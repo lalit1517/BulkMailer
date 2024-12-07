@@ -18,8 +18,8 @@ This project is an open-source backend for sending bulk emails using **Node.js**
 ### **1. Clone the Repository**
 
 ```bash
-git clone https://github.com/your-username/bulk-emailing-backend.git
-cd bulk-emailing-backend
+git clone https://github.com/lalit1517/BulkMailer.git
+cd BulkMailer
 ```
 
 ### **2. Install Dependencies**
@@ -43,15 +43,17 @@ SEND_EMAILS=true                 # Set to 'true' to enable email sending
 
 ### **4. CSV File Structure**
 
+The CSV file should have the following structure, where you can include additional fields for each user. These fields can be used dynamically in the email template:
+
 ```csv
-name,email,bouncedCount
-John Doe,john.doe@example.com,0
-Jane Doe,jane.doe@example.com,0
+name,email,bouncedCount,customField1,customField2
+John Doe,john.doe@example.com,0,Welcome to our platform,Special discount just for you
+Jane Doe,jane.doe@example.com,0,Thank you for joining,Your first order is free
 ```
 
 ### **5. Email Template**
 
-Create an email-template.html file in the src directory. Use {{name}} as a placeholder for user-specific names.
+In email-template.html file in the src directory, you can include placeholders like {{name}}, {{customField1}}, and {{customField2}} to dynamically insert user-specific data:
 
 ### **6. Run the Project Locally**
 
