@@ -4,14 +4,12 @@ const csv = require('csv-parser');
 const { stringify } = require('csv-stringify');
 require('dotenv').config();
 
-// Load user data from CSV
 const loadUsers = (filePath) => {
   return new Promise((resolve, reject) => {
     const users = [];
     fs.createReadStream(filePath)
       .pipe(csv())
       .on('data', (data) => {
-        // Ensure bouncedCount is a number
         data.bouncedCount = parseInt(data.bouncedCount || '0', 10);
         users.push(data);
       })
@@ -20,7 +18,6 @@ const loadUsers = (filePath) => {
   });
 };
 
-// Save the updated users list to CSV
 const saveUsers = (filePath, users) => {
   return new Promise((resolve, reject) => {
     stringify(users, { header: true }, (err, output) => {
@@ -33,21 +30,20 @@ const saveUsers = (filePath, users) => {
   });
 };
 
-// Load email template
 const loadTemplate = (filePath) => {
   return fs.readFileSync(filePath, 'utf-8');
 };
 
-let emailSendingDisabledLogged = false; // Flag to ensure we log only once
+let emailSendingDisabledLogged = false;
 
 const sendEmail = async (transporter, email, subject, body) => {
-  // Check if email sending is disabled
+
   if (process.env.SEND_EMAILS !== 'true') {
     if (!emailSendingDisabledLogged) {
       console.log('Email sending is disabled on this environment.');
-      emailSendingDisabledLogged = true; // Set the flag to true to prevent logging again
+      emailSendingDisabledLogged = true;
     }
-    return false; // Don't proceed with sending or logging any email sent
+    return false;
   }
 
   try {
@@ -71,22 +67,19 @@ const sendBulkEmails = async () => {
     const users = await loadUsers('./src/users.csv');
     const emailTemplate = loadTemplate('./src/email-template.html');
 
-    // Filter out users with invalid emails (those without "@")
     let validUsers = users.filter(user => user.email && user.email.includes('@'));
     const invalidUsers = users.filter(user => !user.email || !user.email.includes('@'));
 
-    // Remove emails bounced more than 3 times
     validUsers = validUsers.filter(user => user.bouncedCount < 3);
 
     // Save the valid users back to the CSV file
     await saveUsers('./src/users.csv', validUsers);
     console.log('Updated users.csv with valid emails only.');
 
-    // Set up nodemailer transporter
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
-      secure: true, // use TLS
+      secure: true,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -95,19 +88,14 @@ const sendBulkEmails = async () => {
 
     // Send emails to valid users
     for (const user of validUsers) {
-      // Check if the name exists and use "User" if it's empty or missing
-      const userName = user.name ? user.name : 'Hudbil User';
 
-      // Customize the email for each user
+      const userName = user.name ? user.name : 'BulkMailer User';
       const customizedTemplate = emailTemplate.replace('{{name}}', userName);
-
-      // Attempt to send the email
-      const isSuccess = await sendEmail(transporter, user.email, 'Regarding Hudbil', customizedTemplate);
+      const isSuccess = await sendEmail(transporter, user.email, 'Regarding BulkMailer', customizedTemplate);
 
       if (isSuccess) {
         console.log(`Email sent to ${user.email}`);
       } else {
-        // No need to increment bounce count if sending is disabled
         if (process.env.SEND_EMAILS === 'true') {
           console.log(`Failed to send email to ${user.email}. Incrementing bounce count.`);
           user.bouncedCount++;
@@ -117,8 +105,6 @@ const sendBulkEmails = async () => {
 
     // Save the updated bounced counts back to the CSV
     await saveUsers('./src/users.csv', validUsers);
-
-    // Log invalid users (if any) who were removed
     if (invalidUsers.length > 0) {
       console.log('Removed the following users with invalid email addresses:');
       invalidUsers.forEach(user => console.log(`- ${user.name || 'Unknown'}: ${user.email}`));
