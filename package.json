@@ -1,8 +1,8 @@
 {
-  "name": "bulk-emailing",
+  "name": "bulkmailer",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,17 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
     "csv-parser": "^3.0.0",
     "csv-stringify": "^6.5.2",
     "dotenv": "^16.4.6",
-    "express": "^4.21.1",
-    "fast-csv": "^5.0.2",
-    "firebase-admin": "^13.0.1",
     "fs": "^0.0.1-security",
-    "mongoose": "^8.8.3",
-    "mysql2": "^3.11.5",
-    "nodemailer": "^6.9.16",
-    "twilio": "^5.3.6"
+    "nodemailer": "^6.9.16"
   }
 }
